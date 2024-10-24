@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Data Tables</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="myPageContainer">
+        <nav class="mySideMenu">
+            <div class="myLogo">Yahya's Weather Application</div>
+            <ul>
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="tables.html" class="active">Tables</a></li>
+            </ul>
+        </nav>
+        <main>
+            <h1>Detailed Weather Data</h1>
+            <div class="mySearchContainer">
+                <input type="text" id="cityInput" placeholder="Enter city name">
+                <select id="unitToggle">
+                    <option value="metric">C</option>
+                    <option value="imperial">F</option>
+                </select>
+                <button id="getWeatherBtn">Display Weather</button>
+            </div>
+            <div id="loading" class="myLoadingMessage">Loading...</div>
+            <div id="weatherData" class="myWeatherData">
+                <h2 id="cityName"></h2>
+                <div class="myFilterSortContainer">
+                    <div class="myFilterButtons">
+                        <button id="filterRainyDays">Show Rainy Days</button>
+                        <button id="filterSunnyDays">Show Sunny Days</button>
+                        <button id="filterAllDays">Show All Days</button>
+                    </div>
+                    <div class="mySortButtons">
+                        <button id="sortTempAsc">Sort Temp (Asc)</button>
+                        <button id="sortTempDesc">Sort Temp (Desc)</button>
+                        <button id="sortDateAsc">Sort Date (Asc)</button>
+                        <button id="sortDateDesc">Sort Date (Desc)</button>
+                    </div>
+                </div>
+                <table id="detailedWeatherTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Temperature</th>
+                            <th>Feels Like</th>
+                            <th>Humidity</th>
+                            <th>Weather</th>
+                            <th>Wind Speed</th>
+                            <th>Pressure</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <div class="myPagination">
+                    <button id="prevPage">Previous</button>
+                    <span id="currentPage"></span>
+                    <button id="nextPage">Next</button>
+                </div>
+            </div>
+            <div class="myChartsContainer">
+                <div class="myChartWrapper">
+                    <canvas id="temperatureHumidityChart"></canvas>
+                </div>
+                <div class="myChartWrapper">
+                    <canvas id="windSpeedChart"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="tables.js"></script>
+</body>
+<style>
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    height: 100%;
+}
+
+.myPageContainer { 
+    display: flex;
+    height: 100%;
+}
+
+/* Side Menu Styling */
+.mySideMenu {
+    width: 250px;
+    height: 100vh;
+    background-color: #4C5C68;
+    padding: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.myLogo { 
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    width: 100%;
+}
+
+ul li {
+    width: 100%;
+}
+
+ul li a {
+    display: block;
+    padding: 15px 20px;
+    text-decoration: none;
+    color: #fff;
+    font-size: 18px;
+    border-radius: 8px;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+ul li a:hover, ul li a.active {
+    background-color: #798E9C;
+    color: #fff;
+}
+
+/* Main Content Styling */
+main {
+    margin-left: 290px;
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #4C5C68;
+}
+
+.mySearchContainer {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.mySearchContainer input, select, button {
+    padding: 10px;
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+button {
+    background-color: #4C5C68;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #798E9C;
+}
+
+.myWeatherData {
+    margin-top: 20px;
+}
+
+#cityName {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table th, table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+table th {
+    background-color: #f2f2f2;
+}
+
+.myPagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.myPagination button {
+    margin: 0 10px;
+    padding: 8px 16px;
+}
+
+/* Filter/Sort Buttons */
+.myFilterButtons, .mySortButtons {
+    margin-bottom: 10px;
+}
+
+.myFilterButtons button, .mySortButtons button {
+    margin-right: 10px;
+    padding: 8px 12px;
+    background-color: #4C5C68;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.myFilterButtons button:hover, 
+.mySortButtons button:hover {
+    background-color: #d0d0d0;
+}
+
+/* Chart Container Styling */
+.myChartsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.myChartWrapper { 
+    width: calc(50% - 10px);
+    margin-bottom: 20px;
+}
+
+.myLoadingMessage { 
+    display: none;
+    text-align: center;
+    font-size: 18px;
+    margin: 20px 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .myPageContainer { 
+        flex-direction: column;
+    }
+
+    .mySideMenu {
+        width: 100%;
+        padding: 10px;
+        position: relative;
+    }
+
+    main {
+        margin-left: 0;
+        padding: 10px;
+    }
+
+    .myChartWrapper {
+        width: 100%;
+    }
+
+    .myFilterSortContainer {
+        flex-direction: column;
+    }
+
+    .myFilterButtons, .mySortButtons {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+</style>
+</html>

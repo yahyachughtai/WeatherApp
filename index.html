@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="myPageContainer">
+        <nav class="mySideMenu">
+            <div class="myLogo">Yahya's Weather Application</div>
+            <ul>
+                <li><a href="index.html" class="active">Dashboard</a></li>
+                <li><a href="tables.html">Tables</a></li>
+            </ul>
+        </nav>
+        <main>
+            <div class="mySearchContainer">
+                <input type="text" id="cityInput" placeholder="Enter city name">
+                <select id="unitToggle">
+                    <option value="metric">C</option>
+                    <option value="imperial">F</option>
+                </select>
+                <button id="getWeatherBtn">Display Weather</button>
+            </div>
+            <div id="loading" class="myLoadingMessage">Loading...</div>
+            <div id="weatherWidget" class="myWeatherWidget">
+                <h2 id="cityName"></h2>
+                <div id="currentWeather"></div> 
+            </div>
+            <div class="myChartsContainer">
+                <div class="myChartWrapper">
+                    <canvas id="temperatureBarChart"></canvas>
+                </div>
+                <div class="myChartWrapper">
+                    <canvas id="weatherConditionsPieChart"></canvas>
+                </div>
+                <div class="myChartWrapper">
+                    <canvas id="temperatureLineChart"></canvas>
+                </div>
+            </div>
+            <div class="myForecastTable">
+                <h3>5-Day Forecast</h3>
+                <div class="myFilterButtons"> 
+                    <button id="filterRainyDays">Show Rainy Days</button>
+                    <button id="sortTempAsc">Sort Temp (Asc)</button>
+                    <button id="sortTempDesc">Sort Temp (Desc)</button>
+                    <button id="highestTempDay">Highest Temp Day</button>
+                </div>
+                <table id="forecastTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Temperature</th>
+                            <th>Weather</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <div class="myPagination">
+                    <button id="prevPage">Previous</button>
+                    <span id="currentPage"></span>
+                    <button id="nextPage">Next</button>
+                </div>
+            </div>
+            <div class="myChatbotWidget">
+                <div id="chatbotMessages"></div>
+                <input type="text" id="chatbotInput" placeholder="Ask about the weather...">
+                <button id="sendChatbotMsg">Send</button>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+<style>
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    height: 100%;
+}
+
+.myPageContainer {
+    display: flex;
+    height: 100%;
+}
+
+/* Side Menu Styling */
+.mySideMenu {
+    width: 250px;
+    height: 100vh;
+    background-color: #4C5C68;
+    padding: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.myLogo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    width: 100%;
+}
+
+ul li {
+    width: 100%;
+}
+
+ul li a {
+    display: block;
+    padding: 15px 20px;
+    text-decoration: none;
+    color: #fff;
+    font-size: 18px;
+    border-radius: 8px;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+ul li a:hover, ul li a.active {
+    background-color: #798E9C;
+    color: #fff;
+}
+
+/* Main Content Styling */
+main {
+    margin-left: 290px;
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+h1, h2, h3 { 
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #4C5C68;
+}
+
+.mySearchContainer {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.mySearchContainer input, 
+.mySearchContainer select, 
+.mySearchContainer button {
+    padding: 10px;
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+button {
+    background-color: #4C5C68;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #798E9C;
+}
+
+/* Weather Widget */
+.myWeatherWidget {
+    background-color: #FFF;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px; 
+}
+
+
+/* Charts Container Styling */
+.myChartsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.myChartWrapper {
+    width: calc(50% - 10px);
+    margin-bottom: 20px;
+}
+
+.myLoadingMessage {
+    display: none;
+    text-align: center;
+    font-size: 18px;
+    margin: 20px 0;
+}
+
+
+/* Forecast Table */
+.myForecastTable {
+    background-color: #FFF;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+}
+
+th, td {
+    border: 1px solid #DDD;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #F2F2F2;
+}
+
+.myFilterButtons {
+    margin-bottom: 10px;
+    display: flex; 
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.myFilterButtons button {
+    margin-right: 5px;
+    margin-bottom: 5px; 
+    padding: 8px 15px;
+    background-color: #4C5C68;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px; 
+}
+
+.myFilterButtons button:hover {
+    background-color: #798E9C;
+}
+
+/* Pagination */
+.myPagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.myPagination button {
+    margin: 0 10px;
+    padding: 8px 15px;
+    background-color: #4C5C68;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.myPagination button:hover {
+    background-color: #798E9C;
+}
+
+/* Chatbot */
+.myChatbotWidget {
+    background-color: #FFF;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+#chatbotMessages {
+    height: 200px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #F2F2F2;
+    border-radius: 5px;
+}
+
+.chat-message {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.chat-message.user {
+    background-color: #798E9C;
+    text-align: right;
+    color: white;
+}
+
+.chat-message.bot {
+    background-color: #4C5C68;
+    text-align: left;
+    color: white;
+}
+
+input#chatbotInput {
+    width: 80%;
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #CCC;
+    border-radius: 5px;
+}
+
+button#sendChatbotMsg {
+    padding: 10px 15px;
+    background-color: #4C5C68;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button#sendChatbotMsg:hover {
+    background-color: #798E9C;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .myPageContainer {
+        flex-direction: column;
+    }
+
+    .mySideMenu {
+        width: 100%;
+        padding: 10px;
+        position: relative;
+    }
+
+    main {
+        margin-left: 0;
+        padding: 10px;
+    }
+
+    .myChartWrapper {
+        width: 100%;
+    }
+
+    .myFilterButtons {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+}
+</style>
+</html>
