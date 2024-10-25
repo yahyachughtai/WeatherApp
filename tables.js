@@ -162,8 +162,6 @@ function updateTableData(data) {
 }
 
 function createCharts() {
-  createTemperatureHumidityChart();
-  createWindSpeedChart();
 }
 
 // Initialize the app
